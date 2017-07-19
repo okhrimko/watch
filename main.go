@@ -21,6 +21,7 @@ func main() {
 	flag.Parse()
 
 	command := strings.Join(flag.Args(), " ")
+	fmt.Println(command)
 
 	if *v {
 		fmt.Println(version)
@@ -51,26 +52,26 @@ func repeatCmd(cmd string, n int) {
 	}
 }
 
-func executeCmd(cmd string) error {
-	var (
-		outCmd []byte
-		err    error
-	)
+func executeCmd(command string) error {
+	var err error
 
 	if err = clearCmd(); err != nil {
 		return err
 	}
-	if outCmd, err = exec.Command(cmd).Output(); err != nil {
-		return nil
+
+	cmd := exec.Command(command)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err = cmd.Run(); err != nil {
+		return err
 	}
 
-	output := string(outCmd)
-	fmt.Fprintf(os.Stdout, output)
 	return nil
 }
 
 func clearCmd() error {
 	c := exec.Command("clear")
 	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
 	return c.Run()
 }
