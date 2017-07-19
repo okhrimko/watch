@@ -39,12 +39,14 @@ func repeatCmd(cmd string, n int) {
 	// first lunch
 	if err := executeCmd(cmd); err != nil {
 		fmt.Fprintf(os.Stderr, "There was an error running '%s' command: \n %v\n", cmd, err)
+		return
 	}
 	for {
 		select {
 		case <-time.After(time.Duration(n) * time.Second):
 			if err := executeCmd(cmd); err != nil {
 				fmt.Fprintf(os.Stderr, "There was an error running '%s' command: \n %v\n", cmd, err)
+				return
 			}
 		case <-done:
 			return
@@ -53,20 +55,14 @@ func repeatCmd(cmd string, n int) {
 }
 
 func executeCmd(command string) error {
-	var err error
-
-	if err = clearCmd(); err != nil {
+	if err := clearCmd(); err != nil {
 		return err
 	}
 
 	cmd := exec.Command(command)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err = cmd.Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Run()
 }
 
 func clearCmd() error {
