@@ -4,10 +4,8 @@ watch command for Windows on Go
 
 Execute a program periodically, showing output full screen
 
-Syntax
+### Syntax
       watch [options] command options
-
-watch [option(s)] command
 
 Options
 
