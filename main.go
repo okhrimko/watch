@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strings"
 	"time"
 )
 
@@ -20,31 +19,42 @@ func main() {
 	v := flag.Bool("v", false, "Display version")
 	flag.Parse()
 
-	command := strings.Join(flag.Args(), " ")
-	fmt.Println(command)
-
 	if *v {
 		fmt.Println(version)
-	} else if *h || len(command) == 0 || n == nil {
+		return
+	} else if *h {
 		flag.PrintDefaults()
-	} else {
-		repeatCmd(command, *n)
+		return
 	}
+
+	args := flag.Args()
+	if len(args) == 0 {
+		fmt.Fprintf(os.Stderr, "command is required")
+		os.Exit(1)
+	}
+	command := args[0]
+	if len(args) > 1 {
+		args = args[1:]
+	} else {
+		args = []string{}
+	}
+
+	repeatCmd(command, args, *n)
 }
 
-func repeatCmd(cmd string, n int) {
+func repeatCmd(cmd string, args []string, n int) {
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt)
 
 	// first lunch
-	if err := executeCmd(cmd); err != nil {
+	if err := executeCmd(cmd, args); err != nil {
 		fmt.Fprintf(os.Stderr, "There was an error running '%s' command: \n %v\n", cmd, err)
 		return
 	}
 	for {
 		select {
 		case <-time.After(time.Duration(n) * time.Second):
-			if err := executeCmd(cmd); err != nil {
+			if err := executeCmd(cmd, args); err != nil {
 				fmt.Fprintf(os.Stderr, "There was an error running '%s' command: \n %v\n", cmd, err)
 				return
 			}
@@ -54,12 +64,12 @@ func repeatCmd(cmd string, n int) {
 	}
 }
 
-func executeCmd(command string) error {
+func executeCmd(command string, args []string) error {
 	if err := clearCmd(); err != nil {
 		return err
 	}
 
-	cmd := exec.Command(command)
+	cmd := exec.Command(command, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
