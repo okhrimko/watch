@@ -11,8 +11,8 @@ watch [option(s)] command
 
 Options
 
-   -n       Specify an interval n seconds to run command (default 5 sec)
+   -`n`     Specify an interval n seconds to run command (default 5 sec)
 
-   -h       Display Help
+   -`h`     Display Help
 
-   -v       Display version
+   -`v`     Display version
