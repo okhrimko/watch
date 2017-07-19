@@ -7,7 +7,7 @@ Execute a program periodically, showing output full screen
 ### Syntax
       watch [options] command options
 
-Options
+### Options
 
    -`n`     Specify an interval n seconds to run command (default 5 sec)
 
