@@ -13,16 +13,20 @@ const (
 	version string = "1.0"
 )
 
+var (
+	n = flag.Int("n", 5, "Specify an interval n seconds to run command")
+	h = flag.Bool("h", false, "Display Help")
+	v = flag.Bool("v", false, "Display version")
+)
+
 func main() {
-	n := flag.Int("n", 5, "Specify an interval n seconds to run command")
-	h := flag.Bool("h", false, "Display Help")
-	v := flag.Bool("v", false, "Display version")
 	flag.Parse()
 
 	if *v {
 		fmt.Println(version)
 		return
-	} else if *h {
+	}
+	if *h {
 		flag.PrintDefaults()
 		return
 	}
@@ -39,10 +43,10 @@ func main() {
 		args = []string{}
 	}
 
-	repeatCmd(command, args, *n)
+	repeatCmd(command, args, time.Duration(*n))
 }
 
-func repeatCmd(cmd string, args []string, n int) {
+func repeatCmd(cmd string, args []string, n time.Duration) {
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt)
 
@@ -53,7 +57,7 @@ func repeatCmd(cmd string, args []string, n int) {
 	}
 	for {
 		select {
-		case <-time.After(time.Duration(n) * time.Second):
+		case <-time.After(n * time.Second):
 			if err := executeCmd(cmd, args); err != nil {
 				fmt.Fprintf(os.Stderr, "There was an error running '%s' command: \n %v\n", cmd, err)
 				return
